@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The City That Burned — Thessaloniki, 1917</title>
+<meta name="description" content="An interactive history of the Great Fire of Thessaloniki, 18–19 August 1917, and the rebuilding of the city by Ernest Hébrard.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..650;1,9..144,300..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f1e9; --card:#fffdf8; --card-2:#f9f4eb; --ink:#1b1612; --ink-2:#4b433b; --muted:#867a6d;
+  --line:rgba(27,22,18,.09); --line-2:rgba(27,22,18,.16);
+  --ember:#df5229; --ember-2:#f0a33a; --ember-soft:#fbe6da; --ember-deep:#8a1f0f;
+  --ash:#17120f; --ash-2:#211a16; --line-d:rgba(245,240,232,.13);
+  --spring:cubic-bezier(.34,1.56,.64,1); --ease:cubic-bezier(.22,1,.36,1);
+  --serif:"Fraunces",Georgia,"Times New Roman",serif; --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:28px; --shadow:0 1px 0 rgba(255,255,255,.7) inset,0 24px 60px -42px rgba(27,22,18,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.72;-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh}
+::selection{background:var(--ember);color:#fff}
+a{color:inherit}
+img,svg{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:inherit}
+:focus-visible{outline:2px solid var(--ember);outline-offset:3px;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- liquid background ---------- */
+.aura{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.aura i{position:absolute;width:52vmax;height:52vmax;border-radius:50%;filter:blur(70px);opacity:.55;transition:transform 2.2s var(--ease),background 1.6s var(--ease)}
+.aura i::after{content:"";position:absolute;inset:0;border-radius:inherit;background:inherit;animation:drift 18s ease-in-out infinite alternate}
+.aura .a1{left:-14vmax;top:-18vmax;background:radial-gradient(closest-side,#f6c9a5,transparent)}
+.aura .a2{right:-18vmax;top:10vh;background:radial-gradient(closest-side,#efd9b6,transparent)}
+.aura .a3{left:20vw;bottom:-30vmax;background:radial-gradient(closest-side,#f3b796,transparent)}
+@keyframes drift{to{transform:translate(6vmax,4vmax) scale(1.12)}}
+body[data-tone=fire] .aura .a1{background:radial-gradient(closest-side,#f39c6b,transparent)}
+body[data-tone=fire] .aura .a3{background:radial-gradient(closest-side,#e8663e,transparent);opacity:.4}
+body[data-tone=calm] .aura .a2{background:radial-gradient(closest-side,#cfe0e4,transparent)}
+
+/* ---------- header + tabs ---------- */
+.top{position:sticky;top:0;z-index:50;background:rgba(245,241,233,.72);backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);border-bottom:1px solid var(--line)}
+.top-in{max-width:1280px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:17px;font-weight:500;white-space:nowrap;text-decoration:none}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--ember);box-shadow:0 0 0 4px rgba(223,82,41,.18);animation:pulse 2.6s var(--ease) infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(223,82,41,0)}}
+.tabs{position:relative;display:flex;gap:2px;padding:4px;margin:0 auto;border-radius:999px;background:rgba(27,22,18,.05);overflow-x:auto;scrollbar-width:none;max-width:100%}
+.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;z-index:1;display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--ink-2);white-space:nowrap;transition:color .35s var(--ease)}
+.tab .no{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--muted);transition:color .35s}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected=true]{color:#fff}
+.tab[aria-selected=true] .no{color:var(--ember-2)}
+.tab-pill{position:absolute;top:4px;bottom:4px;left:0;border-radius:999px;background:var(--ink);box-shadow:0 6px 18px -6px rgba(27,22,18,.5);transition:transform .6s var(--spring),width .6s var(--spring)}
+.count{font-size:12.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.count b{color:var(--ink);font-weight:600}
+.bar{height:2px;background:var(--line)}
+.bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ember-deep),var(--ember),var(--ember-2));transition:width .9s var(--ease)}
+@media (max-width:1100px){.top-in{flex-wrap:wrap;gap:8px 14px}.tabs{order:3;flex:1 0 100%;margin:0}.count{margin-left:auto}}
+
+/* ---------- panels ---------- */
+main{max-width:1280px;margin:0 auto;padding:34px 22px 70px}
+.panel{display:none}
+.panel.active{display:block}
+.panel.active .rise{animation:rise .95s var(--ease) both;animation-delay:calc(var(--i,0) * 75ms)}
+@keyframes rise{from{opacity:0;transform:translateY(22px) scale(.985);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+.head{margin:10px 0 28px;max-width:860px}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--ember)}
+.eyebrow::before{content:"";width:22px;height:1.5px;background:currentColor}
+h1,h2{font-family:var(--serif);font-weight:400;letter-spacing:-.028em;font-variation-settings:"opsz" 144}
+h2{font-size:clamp(36px,5vw,62px);line-height:1.02;margin-top:12px}
+h2 em,h1 em{font-style:italic;font-weight:300;color:var(--ember)}
+h3{font-family:var(--serif);font-weight:500;font-size:22px;line-height:1.2;letter-spacing:-.01em}
+.sub{margin-top:12px;font-size:18px;color:var(--muted);max-width:640px;line-height:1.55}
+
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:1.08fr .92fr}
+.g2r{grid-template-columns:.92fr 1.08fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:920px){.g2,.g2r,.g3{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:clamp(22px,3vw,38px);box-shadow:var(--shadow)}
+.card.dark{background:var(--ash);color:#f5f0e8;border-color:var(--line-d)}
+.text p{color:var(--ink-2);margin-bottom:1em;max-width:62ch}
+.text p:last-child{margin-bottom:0}
+.thesis{margin:20px 0 0;padding:18px 20px;border-radius:18px;background:var(--ember-soft);border-left:3px solid var(--ember);font-family:var(--serif);font-size:19px;line-height:1.5;color:var(--ink)}
+.thesis .lab{display:block;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ember);margin-bottom:6px}
+.label{font-size:11.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+
+/* citations / notes */
+.cite{text-decoration:none;color:inherit;border-bottom:1px dotted var(--muted);white-space:nowrap;transition:color .2s,border-color .2s;cursor:pointer}
+.cite:hover{color:var(--ember);border-color:var(--ember)}
+.dark .cite{border-color:rgba(245,240,232,.4)}
+sup .fn{display:inline-grid;place-items:center;min-width:17px;height:17px;margin-left:2px;padding:0 4px;border-radius:99px;background:var(--ember);color:#fff;font-size:10.5px;font-weight:600;text-decoration:none;line-height:1;vertical-align:2px;transition:transform .4s var(--spring)}
+sup .fn:hover{transform:scale(1.2)}
+.tip{position:fixed;z-index:90;max-width:340px;padding:13px 15px;border-radius:14px;background:var(--ink);color:#f5f0e8;font-size:13.5px;line-height:1.5;box-shadow:0 20px 50px rgba(0,0,0,.3);pointer-events:none;opacity:0;transform:translateY(6px) scale(.97);transition:opacity .22s,transform .35s var(--spring)}
+.tip.on{opacity:1;transform:none}
+.tip b{color:var(--ember-2);font-weight:600}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:13px 20px;border-radius:999px;font-weight:500;font-size:15px;transition:transform .5s var(--spring),box-shadow .3s,background .3s}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:scale(.97)}
+.btn-light{background:#fffdf8;color:var(--ink);box-shadow:0 10px 30px -8px rgba(223,82,41,.55)}
+.btn-glass{color:#fff;border:1px solid rgba(255,255,255,.3);background:rgba(23,18,15,.3);backdrop-filter:blur(8px)}
+.btn svg{width:16px;height:16px}
+
+/* ---------- hero ---------- */
+.hero{position:relative;border-radius:34px;overflow:hidden;min-height:min(74vh,700px);background:var(--ash);color:#f5f0e8;display:flex;align-items:flex-end;isolation:isolate;box-shadow:0 40px 80px -50px rgba(27,22,18,.7)}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-2}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(23,18,15,0) 30%,rgba(23,18,15,.72))}
+.hero-fb{position:absolute;inset:0;z-index:-3;background:radial-gradient(60% 60% at 30% 90%,#8a1f0f,transparent),radial-gradient(50% 50% at 75% 95%,#df5229,transparent),var(--ash)}
+.hero-in{padding:clamp(26px,5vw,60px);max-width:900px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 13px;border-radius:99px;font-size:12.5px;font-weight:500;letter-spacing:.04em;background:rgba(23,18,15,.35);border:1px solid rgba(245,240,232,.2);backdrop-filter:blur(8px)}
+.hero h1{font-size:clamp(52px,9vw,124px);line-height:.92;margin:20px 0 18px}
+.hero h1 em{background:linear-gradient(100deg,#ffd7a1,#f0a33a 45%,#df5229);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:clamp(16px,1.8vw,19px);max-width:560px;color:rgba(245,240,232,.85);line-height:1.6}
+.hero .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+
+.chapters{list-style:none;display:flex;flex-direction:column;gap:6px}
+.chapters button{width:100%;display:grid;grid-template-columns:34px 1fr 20px;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;transition:background .3s,transform .5s var(--spring)}
+.chapters button:hover{background:var(--card-2);transform:translateX(4px)}
+.chapters .n{font-size:12px;font-weight:600;color:var(--ember)}
+.chapters .t{font-weight:600;font-size:15px;line-height:1.3}
+.chapters .d{display:block;font-size:13.5px;color:var(--muted);font-weight:400;margin-top:2px}
+.chapters svg{width:16px;height:16px;color:var(--muted)}
+
+/* context chips (before) */
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.fact{padding:16px;border-radius:20px;background:var(--card);border:1px solid var(--line)}
+.fact b{display:block;font-family:var(--serif);font-size:28px;font-weight:400;color:var(--ember);line-height:1}
+.fact span{display:block;font-size:13.5px;color:var(--ink-2);margin-top:8px;line-height:1.4}
+@media (max-width:560px){.facts{grid-template-columns:1fr}}
+
+/* ---------- figures ---------- */
+.fig{margin:0}
+.media{position:relative;border-radius:22px;overflow:hidden;background:var(--ash-2);aspect-ratio:4/3;transform:translateZ(0)}
+.fig.wide .media{aspect-ratio:16/10}
+.media>svg{position:absolute;inset:0;width:100%;height:100%;transition:transform 1.4s var(--ease)}
+.media img.photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1s var(--ease),transform 1.4s var(--ease)}
+.fig.has-photo img.photo{opacity:1}
+.fig:hover .media>svg,.fig:hover img.photo{transform:scale(1.03)}
+.media .tag{position:absolute;left:12px;top:12px;padding:5px 10px;border-radius:99px;font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;background:rgba(23,18,15,.55);color:#fff;backdrop-filter:blur(8px)}
+.fig.has-photo .tag{display:none}
+.fig figcaption{margin-top:12px;font-size:14px;line-height:1.55;color:var(--muted)}
+.fig figcaption b{color:var(--ink);font-weight:600}
+.dark .fig figcaption{color:rgba(245,240,232,.6)}.dark .fig figcaption b{color:#f5f0e8}
+.fno{font-family:var(--serif);font-style:italic;color:var(--ember);margin-right:4px}
+
+/* ---------- fire stepper ---------- */
+.fire{display:grid;grid-template-columns:400px 1fr;gap:18px}
+@media (max-width:980px){.fire{grid-template-columns:1fr}}
+.clock{display:flex;align-items:center;gap:18px;padding-bottom:18px;margin-bottom:10px;border-bottom:1px solid var(--line-d)}
+.ring{position:relative;width:96px;height:96px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .num{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--serif);font-size:34px;line-height:1}
+.ring .num small{display:block;font-family:var(--sans);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,240,232,.55);margin-top:3px}
+.clock .when{font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--ember-2)}
+.clock .where{font-family:var(--serif);font-size:21px;line-height:1.25;margin-top:2px}
+.steps{list-style:none}
+.step button{width:100%;display:grid;grid-template-columns:22px 1fr;gap:12px;padding:11px 4px;align-items:start}
+.step .dot2{width:12px;height:12px;margin:6px 0 0 4px;border-radius:50%;border:2px solid rgba(245,240,232,.35);transition:all .5s var(--spring)}
+.step.on .dot2{background:var(--ember);border-color:var(--ember);box-shadow:0 0 0 5px rgba(223,82,41,.22),0 0 18px var(--ember);transform:scale(1.15)}
+.step.past .dot2{background:rgba(240,163,58,.6);border-color:transparent}
+.step .st{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:rgba(245,240,232,.5)}
+.step.on .st{color:var(--ember-2)}
+.step .sh{display:block;font-family:var(--serif);font-size:19px;color:rgba(245,240,232,.62);transition:color .3s}
+.step.on .sh{color:#fff}
+.step .sb{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s var(--ease)}
+.step.on .sb{grid-template-rows:1fr}
+.step .sb>div{overflow:hidden}
+.step .sb p{padding:2px 4px 12px 38px;color:rgba(245,240,232,.78);font-size:15.5px;line-height:1.65}
+.stepnav{display:flex;gap:8px;margin-top:12px}
+.stepnav button{flex:1;padding:11px;border-radius:14px;border:1px solid var(--line-d);font-size:14px;font-weight:500;color:#f5f0e8;transition:background .3s,transform .4s var(--spring)}
+.stepnav button:hover{background:rgba(245,240,232,.08)}
+.stepnav button:active{transform:scale(.97)}
+.stepnav button:disabled{opacity:.35;cursor:default}
+.stage-media{position:relative}
+.stage-media .fig{position:absolute;inset:0;opacity:0;transform:scale(1.02);transition:opacity .9s var(--ease),transform 1.2s var(--ease);pointer-events:none}
+.stage-media .fig.show{position:relative;opacity:1;transform:none;pointer-events:auto}
+.stage-media .media{aspect-ratio:16/11}
+
+/* ---------- map ---------- */
+.mapgrid{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+@media (max-width:1040px){.mapgrid{grid-template-columns:1fr}}
+.mapcard{border-radius:var(--r);overflow:hidden;background:var(--ash-2);border:1px solid var(--line-d);box-shadow:0 40px 80px -50px rgba(27,22,18,.7)}
+.mapcard svg{width:100%;height:auto}
+.mapui{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:14px 16px;border-top:1px solid var(--line-d);background:rgba(23,18,15,.7);color:#f5f0e8}
+.play{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--ember);color:#fff;flex:none;transition:transform .45s var(--spring)}
+.play:hover{transform:scale(1.08)}
+.play svg{width:16px;height:16px}
+.scrub{flex:1;min-width:200px}
+.scrub-top{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:rgba(245,240,232,.7);margin-bottom:6px}
+.scrub-top b{color:var(--ember-2)}
+input[type=range].range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:99px;background:linear-gradient(90deg,var(--ember) var(--p,0%),rgba(245,240,232,.15) var(--p,0%))}
+input[type=range].range::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(223,82,41,.35);cursor:grab;transition:transform .3s var(--spring)}
+input[type=range].range::-webkit-slider-thumb:active{transform:scale(1.25)}
+input[type=range].range::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(223,82,41,.35)}
+.layers{display:flex;gap:6px;flex-wrap:wrap}
+.toggle{padding:7px 12px;border-radius:99px;font-size:12.5px;font-weight:500;border:1px solid var(--line-d);color:rgba(245,240,232,.55);transition:all .35s var(--spring)}
+.toggle[aria-pressed=true]{background:rgba(245,240,232,.12);color:#fff;border-color:rgba(245,240,232,.35)}
+.toggle:active{transform:scale(.94)}
+.places{list-style:none;display:flex;flex-direction:column;gap:6px;max-height:640px;overflow:auto;padding-right:2px}
+.place button{width:100%;display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start;padding:12px;border-radius:16px;border:1px solid transparent;transition:all .4s var(--spring)}
+.place button:hover{background:var(--card-2)}
+.place.on button{background:var(--ember-soft);border-color:rgba(223,82,41,.35)}
+.place .n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;background:var(--card-2);border:1px solid var(--line);transition:all .3s}
+.place.burned .n{background:var(--ember);color:#fff;border-color:transparent}
+.place.on .n{transform:scale(1.1)}
+.place .t{font-weight:600;font-size:15px;line-height:1.35}
+.place .k{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.place .pb{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--ease)}
+.place.on .pb{grid-template-rows:1fr}
+.place .pb>div{overflow:hidden}
+.place .pb p{padding:0 12px 12px 52px;font-size:14.5px;line-height:1.6;color:var(--ink-2)}
+.hot{cursor:pointer}
+.hot .halo{transform-box:fill-box;transform-origin:center;animation:halo 2.6s var(--ease) infinite}
+@keyframes halo{0%{transform:scale(.6);opacity:.8}100%{transform:scale(2.3);opacity:0}}
+.hot .core{transition:transform .45s var(--spring);transform-box:fill-box;transform-origin:center}
+.hot:hover .core,.hot.on .core{transform:scale(1.35)}
+.hot text{font:600 12px var(--sans);fill:#fff;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.lyr{transition:opacity .6s var(--ease)}
+.lyr.off{opacity:0;pointer-events:none}
+.flow{stroke-dasharray:8 10;animation:flow 1.2s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-36}}
+.slabel{font:500 11px var(--sans);letter-spacing:.08em;fill:rgba(245,240,232,.55);text-transform:uppercase}
+.plabel{font:italic 400 15px var(--serif);fill:rgba(245,240,232,.8)}
+.mapnote{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.55}
+
+/* ---------- losses ---------- */
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
+@media (max-width:1100px){.stats{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{padding:20px 18px;border-radius:22px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .6s var(--spring)}
+.stat:hover{transform:translateY(-5px)}
+.stat .v{font-family:var(--serif);font-size:clamp(30px,3vw,40px);line-height:1;letter-spacing:-.02em;font-variation-settings:"opsz" 144}
+.stat .v span{color:var(--ember)}
+.stat .k{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.35}
+.seg{position:relative;display:inline-flex;padding:4px;border-radius:99px;background:var(--card-2);border:1px solid var(--line)}
+.seg button{position:relative;z-index:1;padding:7px 14px;border-radius:99px;font-size:13px;font-weight:500;color:var(--muted);transition:color .3s;white-space:nowrap}
+.seg button[aria-pressed=true]{color:var(--ink)}
+.seg .seg-pill{position:absolute;top:4px;bottom:4px;left:0;border-radius:99px;background:#fff;box-shadow:0 2px 10px rgba(27,22,18,.12);transition:transform .55s var(--spring),width .55s var(--spring)}
+.chart-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.bar-row{display:grid;grid-template-columns:140px 1fr 64px;gap:12px;align-items:center;margin:12px 0;font-size:14.5px}
+@media (max-width:560px){.bar-row{grid-template-columns:90px 1fr 56px;font-size:13px}}
+.track{height:14px;border-radius:99px;background:var(--card-2);overflow:hidden}
+.fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--ember-deep),var(--ember));transition:width 1.1s var(--spring)}
+.bar-row .num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.chart small{display:block;margin-top:12px;color:var(--muted);font-size:13px}
+
+/* ---------- compare ---------- */
+.compare{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:3/2;background:var(--card-2);user-select:none;touch-action:pan-y}
+.compare .layer{position:absolute;inset:0}
+.compare .layer>svg,.compare .fig,.compare .media{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;border-radius:0}
+.compare .top{clip-path:inset(0 0 0 var(--x,50%))}
+.compare .handle{position:absolute;top:0;bottom:0;left:var(--x,50%);width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 20px rgba(0,0,0,.3);pointer-events:none;z-index:2}
+.compare .handle::after{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231b1612' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M9 6l-6 6 6 6M15 6l6 6-6 6'/%3E%3C/svg%3E") center/20px no-repeat;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.compare input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;z-index:3;margin:0}
+.compare .ctag{position:absolute;bottom:12px;padding:6px 11px;border-radius:99px;font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:rgba(23,18,15,.7);color:#fff;backdrop-filter:blur(6px);z-index:2;pointer-events:none}
+.compare .ctag.l{left:12px}.compare .ctag.r{right:12px}
+.panes{position:relative;margin-top:16px}
+.pane{display:none}
+.pane.show{display:block;animation:rise .7s var(--ease) both}
+
+/* ---------- accordion (source check) ---------- */
+.acc{list-style:none;display:flex;flex-direction:column;gap:8px}
+.acc li{border-radius:18px;background:var(--card-2);border:1px solid var(--line);overflow:hidden;transition:background .3s}
+.acc li.open{background:#fff}
+.acc button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;font-family:var(--serif);font-size:18px;line-height:1.3}
+.acc .plus{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);font-family:var(--sans);transition:transform .55s var(--spring),background .3s,color .3s}
+.acc li.open .plus{transform:rotate(135deg);background:var(--ember);color:#fff;border-color:transparent}
+.acc .ab{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s var(--ease)}
+.acc li.open .ab{grid-template-rows:1fr}
+.acc .ab>div{overflow:hidden}
+.acc .ab p{padding:0 18px 16px;font-size:15px;line-height:1.65;color:var(--ink-2)}
+.quote{font-family:var(--serif);font-style:italic;font-weight:300;font-size:clamp(24px,2.6vw,32px);line-height:1.25;color:#f5f0e8}
+
+/* ---------- about + sources ---------- */
+.about .card h3{margin-bottom:8px}
+.about .card p{color:var(--ink-2);font-size:15.5px}
+.about .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--ember-soft);color:var(--ember);margin-bottom:14px}
+.about .ic svg{width:20px;height:20px}
+.biblio{list-style:none}
+.biblio li{padding:12px 8px 12px 34px;text-indent:-26px;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.6;color:var(--ink-2);border-radius:10px;transition:background .8s}
+.biblio a{word-break:break-word;color:var(--ember-deep)}
+.notes{list-style:none;counter-reset:n}
+.notes li{position:relative;padding:11px 8px 11px 40px;border-bottom:1px solid var(--line);font-size:14.5px;line-height:1.6;color:var(--ink-2);border-radius:10px;transition:background .8s}
+.notes li::before{counter-increment:n;content:counter(n);position:absolute;left:8px;top:13px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--ember);color:#fff;font-size:11px;font-weight:600}
+.flash{background:rgba(240,163,58,.22)!important}
+.credits{list-style:none;font-size:13.5px;color:var(--muted)}
+.credits li{padding:7px 0;border-bottom:1px dashed var(--line)}
+.credits b{color:var(--ink)}
+
+/* ---------- chapter nav ---------- */
+.cnav{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:34px}
+.cnav button{display:flex;flex-direction:column;gap:4px;padding:18px 22px;border-radius:22px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);transition:transform .55s var(--spring),border-color .3s}
+.cnav button:hover{transform:translateY(-3px);border-color:rgba(223,82,41,.4)}
+.cnav .next{text-align:right;align-items:flex-end}
+.cnav .k{font-size:11.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ember)}
+.cnav .t{font-family:var(--serif);font-size:21px;line-height:1.2}
+.cnav .d{font-size:13.5px;color:var(--muted)}
+.cnav .ph{visibility:hidden}
+@media (max-width:640px){.cnav{grid-template-columns:1fr}.cnav .ph{display:none}}
+footer{max-width:1280px;margin:0 auto;padding:0 22px 40px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body data-tone="warm">
+<div class="aura" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="#intro" data-tab="intro"><span class="dot"></span>Thessaloniki 1917</a>
+    <div class="tabs" role="tablist" aria-label="Chapters" id="tabs">
+      <span class="tab-pill" id="tabPill"></span>
+      <button class="tab" role="tab" data-tab="intro"><span class="no">01</span>Introduction</button>
+      <button class="tab" role="tab" data-tab="before"><span class="no">02</span>Before</button>
+      <button class="tab" role="tab" data-tab="fire"><span class="no">03</span>The Fire</button>
+      <button class="tab" role="tab" data-tab="map"><span class="no">04</span>Map</button>
+      <button class="tab" role="tab" data-tab="losses"><span class="no">05</span>Losses</button>
+      <button class="tab" role="tab" data-tab="rebuild"><span class="no">06</span>Rebuilding</button>
+      <button class="tab" role="tab" data-tab="legacy"><span class="no">07</span>Legacy</button>
+      <button class="tab" role="tab" data-tab="conclusion"><span class="no">08</span>Conclusion</button>
+      <button class="tab" role="tab" data-tab="sources"><span class="no">09</span>About &amp; Sources</button>
+    </div>
+    <span class="count" id="count"><b>1</b> / 9</span>
+  </div>
+  <div class="bar"><span id="bar"></span></div>
+</header>
+
+<main>
+<!-- ============ 01 INTRODUCTION ============ -->
+<section class="panel" role="tabpanel" id="p-intro" data-tone="fire" aria-label="Introduction">
+  <div class="hero rise">
+    <div class="hero-fb"></div>
+    <canvas id="lava" aria-hidden="true"></canvas>
+    <div class="hero-in">
+      <div class="chips"><span class="chip">18–19 August 1917</span><span class="chip">32 hours</span><span class="chip">70,000+ homeless</span></div>
+      <h1>The City That<br><em>Burned</em></h1>
+      <p>How a kitchen fire destroyed the heart of Thessaloniki, and how the city rebuilt on the ashes was designed to be a different place.</p>
+      <div class="cta">
+        <button class="btn btn-light" data-tab="before">Start the story <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        <button class="btn btn-glass" data-tab="map">Open the map</button>
+      </div>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="card rise">
+      <div class="eyebrow">Introduction</div>
+      <h2 style="font-size:clamp(30px,3.6vw,44px)">A spark on <em>Olympiados Street</em></h2>
+      <div class="text" style="margin-top:16px">
+        <p>On the afternoon of Saturday 18 August 1917, a kitchen fire in a refugee house at 3 Olympiados Street, below the Upper Town, spread to straw stored next door (<a class="cite" data-ref="lagoudi">Lagoudi 2024</a>; <a class="cite" data-ref="nli">National Library of Israel n.d.</a>).<sup><a class="fn" data-fn="1" href="#sources">1</a></sup> Driven by a strong wind, it burned for thirty-two hours, destroying about one square kilometre of the historic centre and some 9,500 houses, and leaving more than 70,000 people homeless (<a class="cite" data-ref="hoad">Hoad 2017</a>).</p>
+        <p>This site follows the fire place by place and asks two questions: why did one spark become a catastrophe, and why does the rebuilt city look so unlike the one that burned?</p>
+      </div>
+      <div class="thesis"><span class="lab">Argument</span>The fire became a turning point that the young Greek state used to remake a multi-faith Ottoman port as a planned, modern and Hellenic city (<a class="cite" data-ref="mazower">Mazower 2004</a>; <a class="cite" data-ref="yerolympos">Yerolympos 1996</a>).</div>
+    </div>
+    <div class="card rise">
+      <div class="label">The story in eight chapters</div>
+      <ol class="chapters" id="chapterList"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 BEFORE ============ -->
+<section class="panel" role="tabpanel" id="p-before" data-tone="warm" aria-label="Before 1917">
+  <div class="head rise"><div class="eyebrow">Chapter 02 · 1912–1917</div><h2>A crowded city <em>at war</em></h2></div>
+  <div class="grid g2">
+    <div class="card rise">
+      <div class="text">
+        <p>In 1917 Thessaloniki had been Greek for only five years. Until 1912 it was an Ottoman port where Sephardic Jews formed the largest community, living alongside Muslims and Orthodox Christians in neighbourhoods rarely exclusive to any one group (<a class="cite" data-ref="mazower">Mazower 2004</a>; <a class="cite" data-ref="umich">University of Michigan Library n.d.</a>). Its centre was a dense web of winding lanes, timber-framed houses, bazaars, synagogues, mosques and churches, grown over centuries without an overall plan (<a class="cite" data-ref="yerolympos">Yerolympos 1996</a>).</p>
+        <p>The First World War made the city more crowded and more fragile. From 1915 it was the base of the Allied armies on the Macedonian front, with up to 200,000 soldiers in and around it. The Allies controlled the water reserves for their camps, a summer drought had already reduced supply, and the city had no public fire brigade, only private teams paid by insurance companies (<a class="cite" data-ref="papastathis">Papastathis 1978</a>). Timber, wind, drought and war: the conditions for disaster were already in place.</p>
+      </div>
+      <div class="facts">
+        <div class="fact"><b>1912</b><span>Thessaloniki becomes part of Greece</span></div>
+        <div class="fact"><b>1915</b><span>Allied base for the Macedonian front</span></div>
+        <div class="fact"><b>1917</b><span>Summer drought; water under Allied control</span></div>
+      </div>
+    </div>
+    <figure class="fig rise" data-src="images/ottoman-salonica.jpg" data-illo="ottoman" data-credit="Thessaloniki before 1917. Credit the archive or postcard collection you used.">
+      <div class="media"></div>
+      <figcaption><span class="fno">Fig. 1</span><b>Salonica before the fire.</b> Minarets, church domes and timber houses rising from the waterfront: the dense, mixed city that the fire would destroy.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 03 FIRE ============ -->
+<section class="panel" role="tabpanel" id="p-fire" data-tone="fire" aria-label="The fire">
+  <div class="head rise"><div class="eyebrow">Chapter 03 · 18–19 August 1917</div><h2>Thirty-two <em>hours</em></h2><p class="sub">Step through the fire hour by hour. The image changes as the fire moves through the city.</p></div>
+  <div class="fire">
+    <div class="card dark rise">
+      <div class="clock">
+        <div class="ring">
+          <svg viewBox="0 0 100 100" width="100%" height="100%"><defs><linearGradient id="rg"><stop offset="0" stop-color="#f0a33a"/><stop offset="1" stop-color="#df5229"/></linearGradient></defs><circle cx="50" cy="50" r="44" fill="none" stroke="rgba(245,240,232,.1)" stroke-width="5"/><circle id="ringArc" cx="50" cy="50" r="44" fill="none" stroke="url(#rg)" stroke-width="5" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="276.5" style="transition:stroke-dashoffset 1s cubic-bezier(.22,1,.36,1)"/></svg>
+          <div class="num"><div><span id="hourNum">0</span><small>hours</small></div></div>
+        </div>
+        <div><div class="when" id="clockWhen"></div><div class="where" id="clockWhere"></div></div>
+      </div>
+      <ol class="steps" id="steps">
+        <li class="step" data-hour="0" data-fig="0" data-when="Sat 18 Aug · about 15:00" data-where="Olympiados Street"><button><span class="dot2"></span><span><span class="st">Saturday · 15:00</span><span class="sh">The first flames</span></span></button><div class="sb"><div><p>The fire starts in the Mevlane quarter. With little water to hand, it is not put out in time (<a class="cite" data-ref="lagoudi">Lagoudi 2024</a>).</p></div></div></li>
+        <li class="step" data-hour="4" data-fig="0" data-when="Sat 18 Aug · evening" data-where="Agiou Dimitriou &amp; Leontos Sofou"><button><span class="dot2"></span><span><span class="st">Saturday · evening</span><span class="sh">Two fronts</span></span></button><div class="sb"><div><p>Driven by the Vardaris wind,<sup><a class="fn" data-fn="2" href="#sources">2</a></sup> one front runs along Agiou Dimitriou, the other down Leontos Sofou towards the market (<a class="cite" data-ref="papastathis">Papastathis 1978</a>).</p></div></div></li>
+        <li class="step" data-hour="9" data-fig="0" data-when="Saturday night" data-where="The old quarters"><button><span class="dot2"></span><span><span class="st">Saturday · night</span><span class="sh">Firebreaks fail</span></span></button><div class="sb"><div><p>Allied soldiers blow up buildings to stop the flames, but in places the explosions only spread them (<a class="cite" data-ref="papastathis">Papastathis 1978</a>).</p></div></div></li>
+        <li class="step" data-hour="15" data-fig="1" data-when="Sun 19 Aug · early morning" data-where="The commercial centre"><button><span class="dot2"></span><span><span class="st">Sunday · early morning</span><span class="sh">The wind turns</span></span></button><div class="sb"><div><p>The two fronts merge over the commercial centre between Egnatia Street and the sea, which burns almost completely (<a class="cite" data-ref="papastathis">Papastathis 1978</a>).</p></div></div></li>
+        <li class="step" data-hour="21" data-fig="1" data-when="Sun 19 Aug · 12:00" data-where="Hagia Sophia"><button><span class="dot2"></span><span><span class="st">Sunday · noon</span><span class="sh">Hagia Sophia spared</span></span></button><div class="sb"><div><p>The flames pass around the Byzantine church and push east to Hamidie Street, today Ethnikis Amynis.<sup><a class="fn" data-fn="3" href="#sources">3</a></sup></p></div></div></li>
+        <li class="step" data-hour="32" data-fig="1" data-when="Sun 19 Aug · evening" data-where="The “burned zone”"><button><span class="dot2"></span><span><span class="st">Sunday · evening</span><span class="sh">Burned out</span></span></button><div class="sb"><div><p>After thirty-two hours the fire dies down. The “burned zone” covers about 32 per cent of the city (<a class="cite" data-ref="papastathis">Papastathis 1978</a>).</p></div></div></li>
+      </ol>
+      <div class="stepnav"><button id="stepPrev">← Previous</button><button id="stepNext">Next hour →</button></div>
+    </div>
+    <div class="stage-media rise" id="fireMedia">
+      <figure class="fig show" data-src="images/fire-from-quay.jpg" data-illo="quay" data-credit="The fire seen from the waterfront, August 1917. Public domain, via Wikimedia Commons.">
+        <div class="media"></div>
+        <figcaption><span class="fno">Fig. 2</span><b>Smoke over the city, August 1917.</b> Seen from the waterfront, the blaze shows the scale described in the official reports, as the wind drove it towards the sea.</figcaption>
+      </figure>
+      <figure class="fig" data-src="images/ruins-centre.jpg" data-illo="ruins" data-credit="Ruins of the burned zone, 1917. Public domain, via Wikimedia Commons.">
+        <div class="media"></div>
+        <figcaption><span class="fno">Fig. 3</span><b>The burned zone afterwards.</b> Only stone walls, chimneys and minarets survived among the timber houses, which shows why the old centre burned so fast.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 MAP ============ -->
+<section class="panel" role="tabpanel" id="p-map" data-tone="fire" aria-label="Map">
+  <div class="head rise"><div class="eyebrow">Chapter 04 · Places</div><h2>Follow the fire <em>street by street</em></h2><p class="sub">Press play to watch the burned zone grow, switch layers on and off, and select a place to read its history.</p></div>
+  <div class="mapgrid">
+    <div class="rise">
+      <div class="mapcard">
+        <svg id="citymap" viewBox="0 0 1000 640" role="img" aria-label="Schematic map of central Thessaloniki showing the 1917 burned zone">
+          <defs>
+            <radialGradient id="maskGrad"><stop offset="0" stop-color="#fff"/><stop offset=".86" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient>
+            <mask id="burnMask" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="640"><rect width="1000" height="640" fill="#000"/><ellipse id="burnFront" cx="330" cy="150" rx="0" ry="0" fill="url(#maskGrad)" transform="rotate(34 330 150)"/></mask>
+            <linearGradient id="emberFill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset=".45" stop-color="#df5229"/><stop offset="1" stop-color="#8a1f0f"/></linearGradient>
+            <filter id="rough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="16"/></filter>
+            <filter id="blur18"><feGaussianBlur stdDeviation="18"/></filter>
+            <pattern id="waves" width="40" height="14" patternUnits="userSpaceOnUse"><path d="M0 7 Q10 2 20 7 T40 7" fill="none" stroke="rgba(245,240,232,.07)" stroke-width="1.2"/></pattern>
+            <marker id="arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#f0a33a"/></marker>
+            <marker id="arrW" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="rgba(245,240,232,.7)"/></marker>
+          </defs>
+          <rect width="1000" height="640" fill="#1d1814"/>
+          <path d="M100 150 Q300 52 520 60 T930 150" fill="none" stroke="rgba(245,240,232,.22)" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>
+          <text class="plabel" x="560" y="46" text-anchor="middle">Upper Town</text>
+          <path d="M0 566 C200 552 400 578 600 560 S880 552 1000 566 L1000 640 L0 640Z" fill="#132029"/>
+          <path d="M0 566 C200 552 400 578 600 560 S880 552 1000 566 L1000 640 L0 640Z" fill="url(#waves)"/>
+          <text class="plabel" x="560" y="612" text-anchor="middle" style="fill:rgba(245,240,232,.45)">Thermaic Gulf</text>
+          <text class="slabel" x="70" y="600">Port</text>
+          <path class="lyr" data-layer="zone" d="M250 548 L250 230 L300 230 L300 140 L520 150 L540 230 L640 230 L640 360 L700 360 L700 430 L820 430 L820 548 Z" fill="none" stroke="rgba(240,163,58,.35)" stroke-width="1.4" stroke-dasharray="5 6"/>
+          <g class="lyr" data-layer="zone" mask="url(#burnMask)">
+            <path d="M250 548 L250 230 L300 230 L300 140 L520 150 L540 230 L640 230 L640 360 L700 360 L700 430 L820 430 L820 548 Z M639 395 a26 26 0 1 0 52 0 a26 26 0 1 0 -52 0 Z" fill-rule="evenodd" fill="#df5229" opacity=".5" filter="url(#blur18)"/>
+            <path d="M250 548 L250 230 L300 230 L300 140 L520 150 L540 230 L640 230 L640 360 L700 360 L700 430 L820 430 L820 548 Z M639 395 a26 26 0 1 0 52 0 a26 26 0 1 0 -52 0 Z" fill-rule="evenodd" fill="url(#emberFill)" opacity=".72" filter="url(#rough)"/>
+          </g>
+          <g stroke="rgba(245,240,232,.06)" stroke-width="1"><path d="M120 300 L960 300 M120 260 L960 260 M150 400 L950 400 M150 515 L960 515 M330 200 L330 548 M450 200 L450 548 M570 200 L570 548 M720 250 L720 548 M770 250 L770 548 M880 250 L880 548 M180 200 L180 548"/></g>
+          <g stroke="rgba(245,240,232,.26)" stroke-width="2.4" stroke-linecap="round" fill="none">
+            <path d="M40 548 L980 548"/><path d="M110 480 L960 480"/><path d="M90 360 L960 360"/><path d="M150 230 L700 230"/><path d="M220 150 L600 150"/><path d="M600 430 L940 430"/>
+            <path d="M250 230 L250 548"/><path d="M400 230 L400 548"/><path d="M500 280 L500 548"/><path d="M640 200 L640 548"/><path d="M820 300 L820 548"/>
+          </g>
+          <g class="slabel">
+            <text x="960" y="542" text-anchor="end">Nikis</text><text x="958" y="474" text-anchor="end">Tsimiski</text><text x="958" y="354" text-anchor="end">Egnatia</text>
+            <text x="160" y="224">Agiou Dimitriou</text><text x="225" y="144">Olympiados</text><text x="940" y="424" text-anchor="end">Svolou</text>
+            <text transform="translate(244 330) rotate(-90)" text-anchor="middle">Leontos Sofou</text><text transform="translate(394 300) rotate(-90)" text-anchor="middle">Venizelou</text>
+            <text transform="translate(634 290) rotate(-90)" text-anchor="middle">Agias Sofias</text><text transform="translate(814 360) rotate(-90)" text-anchor="middle">Ethnikis Amynis</text>
+          </g>
+          <g class="lyr" data-layer="spread" fill="none" stroke="#f0a33a" stroke-width="3" stroke-linecap="round">
+            <path class="flow" d="M340 165 C390 210 460 236 570 238" marker-end="url(#arr)"/>
+            <path class="flow" d="M318 170 C280 260 270 390 300 500" marker-end="url(#arr)"/>
+            <path class="flow" d="M310 470 C420 505 540 470 625 418" marker-end="url(#arr)"/>
+            <path class="flow" d="M575 250 C605 320 620 360 640 380" marker-end="url(#arr)"/>
+            <path class="flow" d="M700 445 C745 455 780 470 812 500" marker-end="url(#arr)"/>
+            <g stroke="rgba(245,240,232,.6)" stroke-width="2"><path d="M40 300 L170 330" marker-end="url(#arrW)"/><path d="M40 335 L150 360" marker-end="url(#arrW)"/></g>
+            <text x="40" y="290" stroke="none" fill="rgba(245,240,232,.7)" style="font:italic 15px Fraunces,serif">Vardaris wind</text>
+          </g>
+          <g class="lyr off" data-layer="plan">
+            <path d="M500 548 L500 282" stroke="#f6d7a7" stroke-width="9" stroke-linecap="round" opacity=".9"/>
+            <path d="M452 548 L452 486 Q500 456 548 486 L548 548" fill="rgba(246,215,167,.18)" stroke="#f6d7a7" stroke-width="2"/>
+            <circle cx="510" cy="280" r="20" fill="rgba(246,215,167,.18)" stroke="#f6d7a7" stroke-width="2"/>
+            <text x="560" y="510" style="font:italic 15px Fraunces,serif;fill:#f6d7a7">Hébrard's axis, 1918</text>
+          </g>
+          <g fill="rgba(245,240,232,.5)"><circle cx="765" cy="300" r="7"/><text class="slabel" x="778" y="304">Rotunda</text></g>
+          <g transform="translate(940 70) rotate(-45)"><circle r="22" fill="rgba(245,240,232,.06)" stroke="rgba(245,240,232,.25)"/><path d="M0 -16 L6 4 L0 0 L-6 4Z" fill="#f0a33a"/></g>
+          <text x="912" y="44" style="font:600 11px Inter,sans-serif;fill:rgba(245,240,232,.7)">N</text>
+          <g id="hots" class="lyr" data-layer="places"></g>
+        </svg>
+        <div class="mapui">
+          <button class="play" id="playBtn" aria-label="Play the fire's spread"><svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></button>
+          <div class="scrub">
+            <div class="scrub-top"><span>Hour <b id="mapHour">0</b> of 32</span><span id="mapPhase"></span></div>
+            <input class="range" id="hourRange" type="range" min="0" max="32" step="0.1" value="0" aria-label="Hours since the fire started">
+          </div>
+          <div class="layers" role="group" aria-label="Map layers">
+            <button class="toggle" data-toggle="zone" aria-pressed="true">Burned zone</button>
+            <button class="toggle" data-toggle="spread" aria-pressed="true">Spread</button>
+            <button class="toggle" data-toggle="plan" aria-pressed="false">Hébrard plan</button>
+            <button class="toggle" data-toggle="places" aria-pressed="true">Places</button>
+          </div>
+        </div>
+      </div>
+      <p class="mapnote"><span class="fno">Fig. 4</span><b style="color:var(--ink)">Interactive map, drawn by the author (not to scale).</b> The burned zone follows the boundary streets recorded in official reports (<a class="cite" data-ref="lagoudi">Lagoudi 2024</a>); the timing of its growth is an illustrative reconstruction.</p>
+    </div>
+    <div class="card rise" style="padding:18px">
+      <div class="label" style="padding:4px 8px 0">Eight places, in the order the fire reached them</div>
+      <ol class="places" id="places"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 LOSSES ============ -->
+<section class="panel" role="tabpanel" id="p-losses" data-tone="warm" aria-label="Losses">
+  <div class="head rise"><div class="eyebrow">Chapter 05 · The damage</div><h2>What was <em>lost</em></h2></div>
+  <div class="stats">
+    <div class="stat rise"><div class="v"><span class="cnt" data-to="32">0</span></div><div class="k">hours of burning</div></div>
+    <div class="stat rise"><div class="v">~<span class="cnt" data-to="1">0</span> km²</div><div class="k">about 32% of the city</div></div>
+    <div class="stat rise"><div class="v"><span class="cnt" data-to="9500">0</span></div><div class="k">houses destroyed</div></div>
+    <div class="stat rise"><div class="v"><span class="cnt" data-to="70000">0</span>+</div><div class="k">people homeless</div></div>
+    <div class="stat rise"><div class="v"><span class="cnt" data-to="4096">0</span></div><div class="k">of 7,695 shops lost</div></div>
+    <div class="stat rise"><div class="v"><span class="cnt" data-to="70">0</span>%</div><div class="k">of workers jobless</div></div>
+  </div>
+  <p class="rise" style="font-size:13px;color:var(--muted);margin:-6px 0 18px">Figures: <a class="cite" data-ref="hoad">Hoad 2017</a>; <a class="cite" data-ref="papastathis">Papastathis 1978</a>; <a class="cite" data-ref="lagoudi">Lagoudi 2024</a>.</p>
+  <div class="grid g2">
+    <div class="card rise">
+      <div class="text">
+        <p>The fire destroyed civic and religious landmarks along with homes: the Town Hall, the Post Office, the water and gas companies, the Saatli Mosque and much of the basilica of Agios Dimitrios (<a class="cite" data-ref="lagoudi">Lagoudi 2024</a>). With the shops and workshops gone, most of the city's workers lost their livelihoods overnight (<a class="cite" data-ref="papastathis">Papastathis 1978</a>).</p>
+        <p>The losses were not shared equally. The official Pallis Report counted about 52,000 Jewish, 11,000 Muslim and 10,000 Orthodox Christian homeless (<a class="cite" data-ref="papastathis">Papastathis 1978</a>). Synagogues, schools and the Chief Rabbinate's centuries-old archive disappeared, so the Jewish community had to rebuild even its register of members (<a class="cite" data-ref="nli">National Library of Israel n.d.</a>). Greek and Allied authorities set up tent camps and bread distribution, but relief met only immediate needs (<a class="cite" data-ref="papastathis">Papastathis 1978</a>).</p>
+      </div>
+    </div>
+    <div class="card rise chart" id="chart">
+      <div class="chart-head"><h3>Who lost their homes?</h3>
+        <div class="seg" role="group" aria-label="Choose source"><span class="seg-pill"></span><button aria-pressed="true" data-set="pallis">Pallis Report</button><button aria-pressed="false" data-set="umich">Other estimate</button></div>
+      </div>
+      <div id="bars"></div>
+      <small id="chartNote"></small>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:18px">
+    <figure class="fig rise" data-src="images/agios-dimitrios-1917.jpg" data-illo="basilica" data-credit="Basilica of Agios Dimitrios after the fire, 1917. Public domain, via Wikimedia Commons.">
+      <div class="media"></div>
+      <figcaption><span class="fno">Fig. 5</span><b>Agios Dimitrios after the fire.</b> The basilica of the city's patron saint was gutted; its large-scale restoration made it a symbol of loss and recovery (<a class="cite" data-ref="unesco">UNESCO n.d.</a>).</figcaption>
+    </figure>
+    <figure class="fig rise" data-src="images/tent-camp.jpg" data-illo="tents" data-credit="Relief tent camp, 1917. Credit the archive you used (e.g. National Library of Israel blog).">
+      <div class="media"></div>
+      <figcaption><span class="fno">Fig. 6</span><b>A relief tent camp.</b> Homeless families were housed in camps like this while the authorities decided how, and for whom, the centre would be rebuilt.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 06 REBUILDING ============ -->
+<section class="panel" role="tabpanel" id="p-rebuild" data-tone="calm" aria-label="Rebuilding">
+  <div class="head rise"><div class="eyebrow">Chapter 06 · 1917–1920s</div><h2>A new city <em>on the ashes</em></h2></div>
+  <div class="grid g2r">
+    <div class="card rise">
+      <div class="text">
+        <p>After earlier fires, owners had rebuilt on their old plots. This time Eleftherios Venizelos's government decided that the old centre would not return (<a class="cite" data-ref="mazower">Mazower 2004</a>). Minister Alexandros Papanastasiou set up an international committee led by the French architect and archaeologist Ernest Hébrard, already in the city with the French army's archaeological mission, together with Thomas Mawson, Aristotelis Zachos and Konstantinos Kitsikis (<a class="cite" data-ref="lagoudi">Lagoudi 2024</a>; <a class="cite" data-ref="yerolympos">Yerolympos 1996</a>).</p>
+        <p>Their 1918 plan replaced the lanes with wide avenues, regular blocks, squares and parks that let in light and air (<a class="cite" data-ref="lagoudi">Lagoudi 2024</a>). Its centrepiece was a monumental axis rising from the sea through a new square, today's Aristotelous Square, towards a planned civic centre, framed by façades drawing on Byzantine and Western rather than Ottoman models (<a class="cite" data-ref="yerolympos">Yerolympos 1996</a>). Many grander ideas were never built for lack of money, but the modern centre's street pattern is still largely Hébrard's.</p>
+      </div>
+    </div>
+    <div class="card rise">
+      <div class="seg" role="tablist" aria-label="Rebuilding visuals" id="rbSeg"><span class="seg-pill"></span><button aria-pressed="true" data-pane="pattern">Street pattern</button><button aria-pressed="false" data-pane="plan">Hébrard's plan</button></div>
+      <div class="panes">
+        <div class="pane show" data-pane="pattern">
+          <div class="compare" style="--x:50%"><div class="layer" id="organicLayer"></div><div class="layer top" id="gridLayer"></div><div class="handle"></div><span class="ctag l">Before 1917</span><span class="ctag r">Hébrard 1918</span><input type="range" min="0" max="100" value="50" aria-label="Compare street patterns before and after the fire"></div>
+          <p class="fig" style="margin-top:12px;font-size:14px;color:var(--muted)"><span class="fno">Fig. 7</span><b style="color:var(--ink)">Drag to compare.</b> A schematic drawn by the author of the contrast between winding Ottoman lanes and Hébrard's regular blocks and axis described by <a class="cite" data-ref="yerolympos">Yerolympos 1996</a>.</p>
+        </div>
+        <div class="pane" data-pane="plan">
+          <figure class="fig wide" data-src="images/hebrard-plan.jpg" data-illo="plan" data-credit="Hébrard's plan for Thessaloniki, 1918–1919. Public domain, via Wikimedia Commons.">
+            <div class="media"></div>
+            <figcaption><span class="fno">Fig. 8</span><b>The Hébrard plan, 1918–19.</b> New avenues cut straight across the old property lines, showing that the planners treated the burned zone as a blank slate.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 07 LEGACY ============ -->
+<section class="panel" role="tabpanel" id="p-legacy" data-tone="warm" aria-label="Legacy">
+  <div class="head rise"><div class="eyebrow">Chapter 07 · Interpretation</div><h2>Who was the new city <em>for?</em></h2></div>
+  <div class="grid g2">
+    <div class="card rise">
+      <div class="text">
+        <p>Historians still debate what the reconstruction meant. For some it was an overdue modernisation of a crowded, unhealthy city; for others it Hellenised Thessaloniki at the expense of its Jewish majority (<a class="cite" data-ref="rozen">Rozen 2017</a>). Many Salonican Jews saw the law that reparcelled the burned zone, instead of returning old plots, as a scheme to push them out of the centre, and many families later emigrated (<a class="cite" data-ref="rozen">Rozen 2017</a>; <a class="cite" data-ref="nli">National Library of Israel n.d.</a>).</p>
+        <p>Yet Rozen also shows that some of the Jewish elite adapted to the Greek state and profited from the rebuilding, so the story is not simply one of planners and victims (<a class="cite" data-ref="rozen">Rozen 2017</a>).</p>
+      </div>
+    </div>
+    <div class="card rise">
+      <h3>Reading the sources critically</h3>
+      <p style="color:var(--muted);font-size:14.5px;margin:4px 0 14px">The sources do not always agree. Open each question to see where they differ.</p>
+      <ul class="acc">
+        <li><button aria-expanded="false">One third or two thirds of the city?<span class="plus">+</span></button><div class="ab"><div><p>Careful accounts give about 1 km², roughly 32 per cent of the city (<a class="cite" data-ref="papastathis">Papastathis 1978</a>; <a class="cite" data-ref="hoad">Hoad 2017</a>). Popular articles often say “two thirds”, probably confusing the city with its historic centre.</p></div></div></li>
+        <li><button aria-expanded="false">Sixteen synagogues or thirty-two?<span class="plus">+</span></button><div class="ab"><div><p>The 1917 memorandum lists 16 of 33 destroyed (<a class="cite" data-ref="papastathis">Papastathis 1978</a>); Jewish community sources say 32 (<a class="cite" data-ref="nli">National Library of Israel n.d.</a>), perhaps counting small prayer houses.</p></div></div></li>
+        <li><button aria-expanded="false">Who counted the homeless?<span class="plus">+</span></button><div class="ab"><div><p>Totals agree at about 70,000, but the breakdown by community differs between sources (<a class="cite" data-ref="umich">University of Michigan Library n.d.</a>). Compare them in the chart in Chapter 05.</p></div></div></li>
+        <li><button aria-expanded="false">When was the White Tower built?<span class="plus">+</span></button><div class="ab"><div><p>One heritage source dates it to the late 15th century (<a class="cite" data-ref="gac">Google Arts &amp; Culture n.d.</a>), the Greek tourism organisation to after 1530 (<a class="cite" data-ref="visitgreece">Visit Greece n.d.</a>).</p></div></div></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 08 CONCLUSION ============ -->
+<section class="panel" role="tabpanel" id="p-conclusion" data-tone="calm" aria-label="Conclusion">
+  <div class="head rise"><div class="eyebrow">Chapter 08 · Conclusion</div><h2>Walking the <em>axis</em> today</h2></div>
+  <div class="grid g2r">
+    <div class="card dark rise" style="display:flex;flex-direction:column;justify-content:space-between;gap:24px">
+      <div class="text"><p style="color:rgba(245,240,232,.82)">Walking up from the sea through Aristotelous Square today, it is easy to forget that this orderly view was born from catastrophe. In thirty-two hours the fire destroyed the fabric of Ottoman Salonica; the plan that followed ensured it would not return. To understand the fire is to see both at once: a modern city of light and air, and the mixed neighbourhoods whose streets lie beneath it (<a class="cite" data-ref="mazower">Mazower 2004</a>; <a class="cite" data-ref="naar">Naar 2016</a>).</p></div>
+      <p class="quote">A modern city of light and air, built over the streets of the old one.</p>
+    </div>
+    <div class="card rise">
+      <div class="compare" style="--x:50%;aspect-ratio:4/3">
+        <div class="layer"><figure class="fig" data-src="images/aristotelous-today.jpg" data-illo="today" data-credit="Aristotelous Square today. Photograph by the author."><div class="media"></div></figure></div>
+        <div class="layer top"><figure class="fig" data-src="images/aristotelous-then.jpg" data-illo="then" data-credit="Hébrard's design for the square (then named after Alexander the Great), 1918. Public domain, via Wikimedia Commons."><div class="media"></div></figure></div>
+        <div class="handle"></div><span class="ctag l">Today</span><span class="ctag r">1918 design</span>
+        <input type="range" min="0" max="100" value="50" aria-label="Compare Aristotelous Square as designed in 1918 and today">
+      </div>
+      <p style="margin-top:12px;font-size:14px;color:var(--muted)"><span class="fno">Fig. 9</span><b style="color:var(--ink)">Aristotelous Square, designed and built.</b> Hébrard's 1918 drawing beside the square today: the axis to the sea survived, though the design was simplified.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 09 ABOUT & SOURCES ============ -->
+<section class="panel" role="tabpanel" id="p-sources" data-tone="calm" aria-label="About and sources">
+  <div class="head rise"><div class="eyebrow">Chapter 09 · About this project</div><h2>Concept, process &amp; <em>sources</em></h2></div>
+  <div class="grid g3 about">
+    <div class="card rise"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Concept</h3><p>A journey through space and time: the chapters follow the fire in order, from the city before 1917 to the one built after it, and the map ties each chapter to places that can still be visited.</p></div>
+    <div class="card rise"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div><h3>Locations</h3><p>I chose eight places that mark the fire's start, path and limits, and the axis of the new plan, so the reader sees the old city and the new one side by side.</p></div>
+    <div class="card rise"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg></div><h3>Creative process</h3><p>I began with historical studies and Greece's National Documentation Centre archive, drew the burned zone from official boundary streets, then paired each chapter with archive images and my own photographs. Ember colours mark the fire; pale tones mark the rebuilding.</p></div>
+  </div>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="card rise">
+      <h3 style="margin-bottom:6px">Bibliography</h3>
+      <p style="font-size:13.5px;color:var(--muted);margin-bottom:8px">Chicago author-date style. Select any citation in the text to jump here.</p>
+      <ul class="biblio">
+        <li id="ref-gac">Google Arts &amp; Culture. n.d. “White Tower – Paleochristian and Byzantine Monuments of Thessalonika.” Accessed November 23, 2026. <a href="https://artsandculture.google.com/asset/white-tower-paleochristian-and-byzantine-monuments-of-thessalonika/owHGKOi9BZ1-YA" target="_blank" rel="noopener">https://artsandculture.google.com/asset/white-tower-paleochristian-and-byzantine-monuments-of-thessalonika/owHGKOi9BZ1-YA</a>.</li>
+        <li id="ref-hoad">Hoad, Phil. 2017. “Thessaloniki in the Spotlight: 100 Years after a Fire Destroyed the City of Refugees.” <i>The Guardian</i>, August 14, 2017.</li>
+        <li id="ref-lagoudi">Lagoudi, Elena. 2024. “The Great Thessaloniki Fire of 1917: The Fire That Destroyed One-Third of a City.” SearchCulture.gr, National Documentation Centre (EKT), August 19, 2024. <a href="https://www.searchculture.gr/aggregator/portal/thematicCollections/thessalonikifire1917" target="_blank" rel="noopener">https://www.searchculture.gr/aggregator/portal/thematicCollections/thessalonikifire1917</a>.</li>
+        <li id="ref-mazower">Mazower, Mark. 2004. <i>Salonica, City of Ghosts: Christians, Muslims and Jews, 1430–1950</i>. London: HarperCollins.</li>
+        <li id="ref-naar">Naar, Devin E. 2016. <i>Jewish Salonica: Between the Ottoman Empire and Modern Greece</i>. Stanford, CA: Stanford University Press.</li>
+        <li id="ref-nli">National Library of Israel. n.d. “The Cooking Accident That Destroyed a Jewish Greek Community.” <i>The National Library of Israel Blog</i>. Accessed November 20, 2026. <a href="https://blog.nli.org.il/en/salonika_fire/" target="_blank" rel="noopener">https://blog.nli.org.il/en/salonika_fire/</a>.</li>
+        <li id="ref-papastathis">Papastathis, Charalambos K. 1978. “A Memorandum on the Fire of Thessaloniki in 1917 and the Care of the Victims” [in Greek]. <i>Makedonika</i> 18: 143–71. <a href="https://doi.org/10.12681/makedonika.492" target="_blank" rel="noopener">https://doi.org/10.12681/makedonika.492</a>.</li>
+        <li id="ref-rozen">Rozen, Minna. 2017. “Money, Power, Politics, and the Great Salonika Fire of 1917.” <i>Jewish Social Studies</i> 22 (2): 74–115. <a href="https://doi.org/10.2979/jewisocistud.22.2.03" target="_blank" rel="noopener">https://doi.org/10.2979/jewisocistud.22.2.03</a>.</li>
+        <li id="ref-unesco">UNESCO World Heritage Centre. n.d. “Paleochristian and Byzantine Monuments of Thessalonika.” Accessed November 23, 2026. <a href="https://whc.unesco.org/en/list/456/" target="_blank" rel="noopener">https://whc.unesco.org/en/list/456/</a>.</li>
+        <li id="ref-umich">University of Michigan Library. n.d. “The Jewish District of Salonica Destroyed by the Fire of 1917.” <i>Beyond the Reading Room</i> (blog). Accessed November 20, 2026. <a href="https://blogs.lib.umich.edu/beyond-reading-room/jewish-district-salonica-destroyed-fire-1917" target="_blank" rel="noopener">https://blogs.lib.umich.edu/beyond-reading-room/jewish-district-salonica-destroyed-fire-1917</a>.</li>
+        <li id="ref-visitgreece">Visit Greece (Greek National Tourism Organisation). n.d. “The White Tower.” Accessed November 23, 2026. <a href="https://www.visitgreece.gr/experiences/culture/archaeological-sites-and-monuments/the-white-tower/" target="_blank" rel="noopener">https://www.visitgreece.gr/experiences/culture/archaeological-sites-and-monuments/the-white-tower/</a>.</li>
+        <li id="ref-yerolympos">Yerolympos, Alexandra. 1996. <i>Urban Transformations in the Balkans (1820–1920): Aspects of Balkan Town Planning and the Remaking of Thessaloniki</i>. Thessaloniki: University Studio Press.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card rise">
+        <h3 style="margin-bottom:8px">Notes</h3>
+        <ol class="notes">
+          <li id="n1">Greece still used the Julian calendar in 1917, so local documents date the fire to 5 August (Old Style). The court investigation concluded that it was an accident (<a class="cite" data-ref="papastathis">Papastathis 1978</a>).</li>
+          <li id="n2">The Vardaris is the strong northerly wind that blows down the Axios (Vardar) valley towards the Thermaic Gulf. Greek accounts sometimes remember the fire as the “Fiery Vardaris” (<a class="cite" data-ref="lagoudi">Lagoudi 2024</a>).</li>
+          <li id="n3">The official boundary streets of the burned zone were Agiou Dimitriou, Leontos Sofou, Nikis, Ethnikis Amynis (formerly Hamidie), Alexandrou Svolou and Egnatia (<a class="cite" data-ref="papastathis">Papastathis 1978</a>; <a class="cite" data-ref="lagoudi">Lagoudi 2024</a>).</li>
+        </ol>
+      </div>
+      <div class="card rise" style="margin-top:18px">
+        <h3 style="margin-bottom:8px">Image credits</h3>
+        <ul class="credits" id="credits"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<nav class="cnav" id="cnav" aria-label="Chapter navigation"></nav>
+</main>
+<footer><span><b style="color:var(--ink);font-weight:500">The City That Burned</b> · History on the Web: the Great Fire of Thessaloniki, 1917</span><span>Your Name · Course · November 2026</span></footer>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+function rnd(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function skyline(R,base,fill,opts){
+  opts=opts||{};var s='',x=-10;
+  while(x<810){var w=26+R()*46,h=40+R()*90;var y=base-h;s+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+(h+2)+'" fill="'+fill+'"/>';
+    if(R()<.45)s+='<path d="M'+(x-3)+' '+y+' L'+(x+w/2)+' '+(y-14-R()*10)+' L'+(x+w+3)+' '+y+'Z" fill="'+fill+'"/>';
+    if(opts.windows&&R()<.6){for(var k=0;k<3;k++)s+='<rect x="'+(x+6+k*9)+'" y="'+(y+12)+'" width="4" height="7" fill="'+opts.windows+'" opacity="'+(.3+R()*.6)+'"/>'}
+    if(R()<.18){var mx=x+w*R(),mh=80+R()*70;s+='<rect x="'+(mx-3.5)+'" y="'+(base-mh)+'" width="7" height="'+mh+'" fill="'+fill+'"/><path d="M'+(mx-5)+' '+(base-mh)+' L'+mx+' '+(base-mh-22)+' L'+(mx+5)+' '+(base-mh)+'Z" fill="'+fill+'"/><rect x="'+(mx-6)+'" y="'+(base-mh*.72)+'" width="12" height="4" fill="'+fill+'"/>'}
+    if(R()<.16){var dx=x+w/2,dr=14+R()*12;s+='<circle cx="'+dx+'" cy="'+(y)+'" r="'+dr+'" fill="'+fill+'"/>'}
+    if(opts.cypress&&R()<.2){var cx=x+R()*w;s+='<ellipse cx="'+cx+'" cy="'+(base-38)+'" rx="7" ry="40" fill="'+fill+'"/>'}
+    x+=w+(R()<.2?6:0)}
+  return s;
+}
+var ILLO={
+  quay:function(){var R=rnd(7);return '<svg viewBox="0 0 800 1000" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="qs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1210"/><stop offset=".45" stop-color="#6b1a0c"/><stop offset=".7" stop-color="#e4572e"/><stop offset=".78" stop-color="#f3a712"/></linearGradient><filter id="qb"><feGaussianBlur stdDeviation="22"/></filter><linearGradient id="qw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a2a10"/><stop offset="1" stop-color="#0f0b09"/></linearGradient></defs><rect width="800" height="1000" fill="url(#qs)"/><g filter="url(#qb)" fill="#2a1d18" opacity=".85"><circle cx="200" cy="420" r="160"><animate attributeName="cy" values="420;380;420" dur="9s" repeatCount="indefinite"/></circle><circle cx="470" cy="330" r="200"><animate attributeName="cy" values="330;290;330" dur="11s" repeatCount="indefinite"/></circle><circle cx="680" cy="440" r="150"/></g><g filter="url(#qb)" fill="#f3a712" opacity=".55"><ellipse cx="400" cy="720" rx="380" ry="60"><animate attributeName="opacity" values=".5;.85;.5" dur="2.6s" repeatCount="indefinite"/></ellipse></g>'+skyline(R,760,'#120d0b',{windows:'#f3a712'})+'<rect y="760" width="800" height="240" fill="url(#qw)"/><g stroke="#f3a712" stroke-width="2" opacity=".35">'+Array.from({length:14},function(_,i){var y=780+i*15,x=80+R()*500;return '<path d="M'+x+' '+y+' h'+(40+R()*160)+'"/>'}).join('')+'</g></svg>'},
+  ottoman:function(){var R=rnd(21);return '<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="os" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9dcc4"/><stop offset="1" stop-color="#d9b98e"/></linearGradient></defs><rect width="800" height="600" fill="url(#os)"/><circle cx="610" cy="170" r="54" fill="#f3d39b"/><path d="M0 330 Q200 240 420 290 T800 260 L800 600 L0 600Z" fill="#c9a77a" opacity=".6"/>'+skyline(R,460,'#6b5640',{cypress:true})+skyline(rnd(5),500,'#4a3a2b',{cypress:true})+'<rect y="500" width="800" height="100" fill="#8aa0a4"/><g stroke="#e9dcc4" stroke-width="2" opacity=".6"><path d="M60 530h120M300 550h160M560 528h140M120 570h90"/></g></svg>'},
+  ruins:function(){var R=rnd(13),s='';for(var i=0;i<22;i++){var x=R()*820-10,w=20+R()*60,h=30+R()*120,y=500-h;s+='<path d="M'+x+' 500 L'+x+' '+y+' l'+(w*.3)+' '+(10+R()*20)+' l'+(w*.25)+' '+(-15-R()*15)+' l'+(w*.45)+' '+(20+R()*30)+' L'+(x+w)+' 500Z" fill="#2b2420"/>'}
+    for(var j=0;j<6;j++){var cx=R()*780;s+='<rect x="'+cx+'" y="'+(330+R()*80)+'" width="12" height="200" fill="#211b17"/>'}
+    return '<svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="rs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e8478"/><stop offset="1" stop-color="#c8bba8"/></linearGradient><filter id="rb"><feGaussianBlur stdDeviation="20"/></filter></defs><rect width="800" height="450" fill="url(#rs)"/><g filter="url(#rb)" fill="#5c534b" opacity=".6"><circle cx="160" cy="120" r="120"><animate attributeName="cx" values="160;200;160" dur="12s" repeatCount="indefinite"/></circle><circle cx="560" cy="80" r="140"/></g><rect x="610" y="170" width="10" height="330" fill="#211b17"/><path d="M606 170 L615 140 L624 170Z" fill="#211b17"/>'+s+'<rect y="490" width="800" height="20" fill="#3a312b"/><path d="M0 450 L800 450" stroke="#3a312b"/><rect y="440" width="800" height="20" fill="#4a4038"/></svg>'},
+  basilica:function(){return '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="bs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5e544c"/><stop offset="1" stop-color="#a99987"/></linearGradient><filter id="bb"><feGaussianBlur stdDeviation="14"/></filter></defs><rect width="400" height="300" fill="url(#bs)"/><g filter="url(#bb)" fill="#2b2420" opacity=".55"><circle cx="120" cy="70" r="70"><animate attributeName="cy" values="70;55;70" dur="8s" repeatCount="indefinite"/></circle><circle cx="290" cy="50" r="80"/></g><g fill="#221c18"><path d="M60 250 V150 L200 95 L340 150 V250Z"/><path d="M110 250 V170 L200 128 L290 170 V250Z" fill="#2e2620"/><rect x="40" y="185" width="320" height="65"/></g><g fill="#a99987" opacity=".55">'+[80,120,160,200,240,280,320].map(function(x){return '<path d="M'+(x-9)+' 235 V205 a9 9 0 0 1 18 0 V235Z"/>'}).join('')+'</g><path d="M130 110 l20 -8 l-6 22 z M250 120 l18 10 l-14 10z" fill="#a99987" opacity=".5"/><rect y="250" width="400" height="50" fill="#3a312b"/></svg>'},
+  tents:function(){var R=rnd(3),s='';for(var r=0;r<4;r++){for(var i=0;i<9;i++){var x=i*48+(r%2)*24-10+R()*6,y=170+r*32,w=40-r*2;s+='<path d="M'+x+' '+y+' L'+(x+w/2)+' '+(y-26+r*2)+' L'+(x+w)+' '+y+'Z" fill="'+(r%2?'#e8dccb':'#d8c9b2')+'" stroke="#8a7b66" stroke-width="1"/><path d="M'+(x+w/2)+' '+(y-26+r*2)+' L'+(x+w/2)+' '+y+'" stroke="#8a7b66"/>'}}
+    return '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><rect width="400" height="300" fill="#cfc0a6"/><path d="M0 140 Q120 90 230 120 T400 100 V300 H0Z" fill="#b19f80"/><path d="M0 160 Q150 130 400 150 V300 H0Z" fill="#a08c6c"/>'+s+'<rect y="290" width="400" height="10" fill="#8a7b66"/></svg>'},
+  plan:function(){var s='',i;for(i=0;i<11;i++){s+='<path d="M'+(40+i*70)+' 40 V560" />'}for(i=0;i<8;i++){s+='<path d="M40 '+(40+i*70)+' H760" />'}
+    return '<svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice"><rect width="800" height="450" fill="#ece0c8"/><g stroke="#b8a582" stroke-width=".6" opacity=".7">'+s+'</g><g fill="#d7c3a0" stroke="#5a4a36" stroke-width="1.2">'+(function(){var o='',x,y;for(y=60;y<380;y+=58){for(x=60;x<760;x+=74){if(Math.abs(x+30-400)<60)continue;o+='<rect x="'+x+'" y="'+y+'" width="58" height="44" rx="2"/>'}}return o})()+'</g><path d="M400 450 V40" stroke="#b33a1d" stroke-width="10"/><path d="M340 450 V380 Q400 340 460 380 V450" fill="#ece0c8" stroke="#b33a1d" stroke-width="3"/><circle cx="400" cy="70" r="30" fill="#ece0c8" stroke="#b33a1d" stroke-width="3"/><path d="M60 230 L740 120" stroke="#5a4a36" stroke-width="5" opacity=".8"/><text x="740" y="34" text-anchor="end" style="font:italic 18px Fraunces,serif;fill:#5a4a36">Plan for Thessaloniki · 1918</text></svg>'},
+  then:function(){return '<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><rect width="800" height="600" fill="#ece0c8"/><g stroke="#5a4a36" stroke-width="1.4" fill="none"><path d="M0 420 L330 300 L330 120 L0 70"/><path d="M800 420 L470 300 L470 120 L800 70"/>'+[0,1,2,3,4,5,6,7,8].map(function(i){var x=i*36;return '<path d="M'+x+' '+(420-x*.36)+' V'+(70+x*.15)+'"/><path d="M'+(800-x)+' '+(420-x*.36)+' V'+(70+x*.15)+'"/>'}).join('')+'<path d="M330 300 Q400 270 470 300"/><path d="M0 470 H800"/></g><g stroke="#5a4a36" stroke-width=".7" opacity=".6">'+Array.from({length:30},function(_,i){return '<path d="M0 '+(440+i*6)+' L800 '+(440+i*6)+'"/>'}).join('')+'</g><text x="400" y="560" text-anchor="middle" style="font:italic 20px Fraunces,serif;fill:#5a4a36">Square of Alexander the Great · design, 1918</text></svg>'},
+  today:function(){return '<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="ts" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fc4dd"/><stop offset="1" stop-color="#f1e6d2"/></linearGradient></defs><rect width="800" height="600" fill="url(#ts)"/><rect y="290" width="800" height="40" fill="#5f8fae"/><path d="M0 330 L800 330 L800 600 L0 600Z" fill="#d9cdb8"/><path d="M0 600 L330 330 L470 330 L800 600Z" fill="#e8dfcf"/><g fill="#c97d4f"><path d="M0 560 L250 330 L250 140 L0 40Z"/><path d="M800 560 L550 330 L550 140 L800 40Z"/></g><g fill="#a35f37">'+[0,1,2,3,4,5].map(function(i){var x=20+i*38,top=60+i*16,bot=520-i*36;return '<path d="M'+x+' '+bot+' V'+(bot-50+i*4)+' a14 14 0 0 1 28 0 V'+bot+'Z" transform="translate(0 0)"/><path d="M'+(780-i*38)+' '+bot+' V'+(bot-50+i*4)+' a-14 14 0 0 0 -28 0 V'+bot+'Z"/>'}).join('')+'</g><g fill="#3a312b">'+Array.from({length:26},function(_,i){var R=rnd(i+3);var x=280+R()*240,y=360+R()*200,h=8+(y-330)*.06;return '<rect x="'+x+'" y="'+(y-h)+'" width="'+(h*.35)+'" height="'+h+'" rx="2"/>'}).join('')+'</g></svg>'}
+};
+
+(function(){
+"use strict";
+var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var $=function(s,c){return (c||document).querySelector(s)}, $$=function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s))};
+
+/* ---------- chapters & tabs ---------- */
+var TABS=[
+ {id:'intro',t:'Introduction',d:'A spark on Olympiados Street'},
+ {id:'before',t:'Before 1917',d:'A crowded, multi-faith city at war'},
+ {id:'fire',t:'The Fire',d:'Thirty-two hours, step by step'},
+ {id:'map',t:'Map',d:'Eight places along the fire’s path'},
+ {id:'losses',t:'Losses',d:'Homes, landmarks and livelihoods'},
+ {id:'rebuild',t:'Rebuilding',d:'Hébrard’s plan for a new city'},
+ {id:'legacy',t:'Legacy',d:'Who was the new city for?'},
+ {id:'conclusion',t:'Conclusion',d:'Walking the axis today'},
+ {id:'sources',t:'About & Sources',d:'Concept, process and bibliography'}
+];
+var ids=TABS.map(function(x){return x.id}), cur=-1, inited={};
+var tabs=$$('.tab'), pill=$('#tabPill'), tabsBox=$('#tabs');
+var arrow='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>';
+$('#chapterList').innerHTML=TABS.slice(1).map(function(c,i){return '<li><button data-tab="'+c.id+'"><span class="n">'+String(i+2).padStart(2,'0')+'</span><span class="t">'+c.t+'<span class="d">'+c.d+'</span></span>'+arrow+'</button></li>'}).join('');
+var AURA={intro:[[0,0],[0,0],[0,0]],before:[[10,8],[-6,4],[4,-6]],fire:[[18,14],[-12,8],[-8,-10]],map:[[24,6],[-4,16],[10,-14]],losses:[[6,20],[-16,-4],[16,-4]],rebuild:[[-6,10],[-20,10],[20,-12]],legacy:[[12,24],[-8,-8],[-4,-16]],conclusion:[[20,0],[-14,20],[8,-20]],sources:[[0,12],[-10,0],[0,-8]]};
+function movePill(){var a=tabs[cur];if(!a)return;pill.style.width=a.offsetWidth+'px';pill.style.transform='translateX('+a.offsetLeft+'px)'}
+function show(id,opt){
+  opt=opt||{};var i=ids.indexOf(id);if(i<0)i=0;id=ids[i];
+  if(i===cur&&!opt.force){return}
+  var prev=cur;cur=i;
+  $$('.panel').forEach(function(p){p.classList.remove('active')});
+  var p=$('#p-'+id);
+  $$('.rise',p).forEach(function(el,k){el.style.setProperty('--i',Math.min(k,10))});
+  void p.offsetWidth; p.classList.add('active');
+  document.body.dataset.tone=p.dataset.tone||'warm';
+  tabs.forEach(function(t,k){t.setAttribute('aria-selected',k===i);t.tabIndex=k===i?0:-1});
+  movePill();
+  var t=tabs[i];if(t.offsetLeft<tabsBox.scrollLeft+20||t.offsetLeft+t.offsetWidth>tabsBox.scrollLeft+tabsBox.clientWidth-20)tabsBox.scrollTo({left:t.offsetLeft-tabsBox.clientWidth/2+t.offsetWidth/2,behavior:reduce?'auto':'smooth'});
+  $('#count').innerHTML='<b>'+(i+1)+'</b> / '+ids.length;
+  $('#bar').style.width=((i+1)/ids.length*100)+'%';
+  var A=AURA[id]||AURA.intro;$$('.aura i').forEach(function(b,k){b.style.transform='translate('+A[k][0]+'vw,'+A[k][1]+'vh)'});
+  renderNav(i);
+  if(!opt.keepScroll&&prev>=0)window.scrollTo({top:0,behavior:reduce?'auto':'smooth'});
+  if(!opt.noHash){try{history.replaceState(null,'','#'+id)}catch(e){}}
+  if(INIT[id]&&!inited[id]){inited[id]=true;INIT[id]()}
+  if(ENTER[id])ENTER[id]();
+  lava.active(id==='intro');
+}
+function renderNav(i){
+  var p=TABS[i-1],n=TABS[i+1],h='';
+  h+=p?'<button class="prev" data-tab="'+p.id+'"><span class="k">← Previous</span><span class="t">'+p.t+'</span><span class="d">'+p.d+'</span></button>':'<span class="ph"></span>';
+  h+=n?'<button class="next" data-tab="'+n.id+'"><span class="k">Next →</span><span class="t">'+n.t+'</span><span class="d">'+n.d+'</span></button>':'<button class="next" data-tab="intro"><span class="k">Back to start ↺</span><span class="t">Introduction</span><span class="d">Read the story again</span></button>';
+  $('#cnav').innerHTML=h;
+}
+document.addEventListener('click',function(e){
+  var c=e.target.closest('a.cite');if(c){e.preventDefault();jump('ref-'+c.dataset.ref);return}
+  var f=e.target.closest('a.fn');if(f){e.preventDefault();jump('n'+f.dataset.fn);return}
+  var b=e.target.closest('[data-tab]');if(b){e.preventDefault();show(b.dataset.tab)}
+});
+function jump(target){hideTip();show('sources',{keepScroll:true});setTimeout(function(){var el=document.getElementById(target);if(!el)return;var y=el.getBoundingClientRect().top+window.scrollY-120;window.scrollTo({top:y,behavior:reduce?'auto':'smooth'});el.classList.add('flash');setTimeout(function(){el.classList.remove('flash')},1800)},60)}
+tabsBox.addEventListener('keydown',function(e){var k=e.key;if(k!=='ArrowRight'&&k!=='ArrowLeft'&&k!=='Home'&&k!=='End')return;e.preventDefault();var n=k==='Home'?0:k==='End'?ids.length-1:(cur+(k==='ArrowRight'?1:-1)+ids.length)%ids.length;show(ids[n]);tabs[n].focus()});
+window.addEventListener('resize',movePill);
+window.addEventListener('hashchange',function(){var h=location.hash.slice(1);if(ids.indexOf(h)>=0)show(h,{noHash:true})});
+
+/* ---------- tooltips (delegated) ---------- */
+var tip=$('#tip');
+function hideTip(){tip.classList.remove('on')}
+function showTip(el){var html='';
+  if(el.classList.contains('cite')){var r=document.getElementById('ref-'+el.dataset.ref);if(r)html='<b>Source</b><br>'+r.innerHTML.replace(/<a [^>]*>(.*?)<\/a>/g,'$1')}
+  else{var n=document.getElementById('n'+el.dataset.fn);if(n)html='<b>Note '+el.dataset.fn+'</b><br>'+n.textContent}
+  if(!html)return;tip.innerHTML=html;tip.classList.add('on');
+  var r2=el.getBoundingClientRect(),tw=tip.offsetWidth,th=tip.offsetHeight;
+  var x=Math.max(12,Math.min(window.innerWidth-tw-12,r2.left+r2.width/2-tw/2)),y=r2.top-th-10;if(y<80)y=r2.bottom+10;
+  tip.style.left=x+'px';tip.style.top=y+'px'}
+document.addEventListener('mouseover',function(e){var el=e.target.closest('a.cite,a.fn');if(el)showTip(el)});
+document.addEventListener('mouseout',function(e){if(e.target.closest('a.cite,a.fn'))hideTip()});
+document.addEventListener('focusin',function(e){var el=e.target.closest('a.cite,a.fn');if(el)showTip(el)});
+document.addEventListener('focusout',hideTip);
+window.addEventListener('scroll',hideTip,{passive:true});
+
+/* ---------- figures: illustrations + photos ---------- */
+$$('figure.fig').forEach(function(f){
+  var m=$('.media',f),kind=f.dataset.illo;
+  if(ILLO[kind])m.innerHTML=ILLO[kind]()+'<span class="tag">Illustration</span>';
+  var src=f.dataset.src;if(!src)return;
+  var img=new Image();img.className='photo';img.alt=(f.querySelector('figcaption b')||{}).textContent||'';
+  img.onload=function(){m.appendChild(img);requestAnimationFrame(function(){f.classList.add('has-photo');credits()})};
+  img.src=src;
+});
+function credits(){var out=[];
+  $$('figure.fig').forEach(function(f){var no=f.querySelector('.fno'),lab=no?no.textContent:'Fig. 9';var b=f.querySelector('figcaption b');var title=b?b.textContent.replace(/[.,]$/,''):(f.closest('.top')?'1918 design':'Today');
+    out.push('<li><b>'+lab+'</b> '+(f.classList.contains('has-photo')?f.dataset.credit:title+': original illustration by the author.')+'</li>')});
+  out.push('<li><b>Fig. 4 &amp; Fig. 7</b> Map and diagram drawn by the author.</li>');
+  out.sort(function(a,b){var na=+(a.match(/Fig\. (\d)/)||[0,99])[1],nb=+(b.match(/Fig\. (\d)/)||[0,99])[1];return na-nb});
+  $('#credits').innerHTML=out.join('');}
+credits();
+
+/* ---------- hero liquid fire ---------- */
+var lava=(function(){
+  var cv=$('#lava'),gl=cv.getContext('webgl',{antialias:false});var on=false,raf=0;
+  if(!gl){cv.style.display='none';return{active:function(){}}}
+  var vs='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  var fs=['precision mediump float;uniform vec2 R;uniform float T;uniform vec2 M;',
+  'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
+  'float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}',
+  'float fbm(vec2 p){float v=0.,a=.5;mat2 r=mat2(.8,.6,-.6,.8);for(int i=0;i<5;i++){v+=a*n(p);p=r*p*2.03;a*=.5;}return v;}',
+  'void main(){vec2 uv=gl_FragCoord.xy/R.y;vec2 m=M/R.y;float t=T*.05;',
+  'vec2 q=vec2(fbm(uv*1.5+vec2(0.,-t*1.6)),fbm(uv*1.5+vec2(5.2,1.3)+t));float d=length(uv-m);float g=exp(-d*d*7.);',
+  'vec2 r=vec2(fbm(uv*1.5+3.*q+vec2(1.7,9.2)-vec2(0.,t*2.)+g*.4),fbm(uv*1.5+3.*q+vec2(8.3,2.8)+t*.6));',
+  'float f=fbm(uv*1.5+3.4*r);float y=gl_FragCoord.y/R.y;f+=.30-y*.42+g*.32;',
+  'vec3 c=vec3(.07,.05,.045);c=mix(c,vec3(.30,.06,.03),smoothstep(.36,.6,f));c=mix(c,vec3(.87,.33,.17),smoothstep(.56,.8,f));c=mix(c,vec3(.99,.72,.33),smoothstep(.8,1.,f));',
+  'c+=vec3(.9,.35,.1)*g*.12;vec2 v=gl_FragCoord.xy/R-.5;c*=1.-dot(v,v)*.8;gl_FragColor=vec4(c,1.);}'].join('\n');
+  function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o}
+  var pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){cv.style.display='none';return{active:function(){}}}
+  gl.useProgram(pr);var b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  var loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  var uR=gl.getUniformLocation(pr,'R'),uT=gl.getUniformLocation(pr,'T'),uM=gl.getUniformLocation(pr,'M');
+  var S=.5,W=2,H=2,mx=0,my=0,tx=0,ty=0,t0=performance.now();
+  function size(){var r=cv.getBoundingClientRect();W=Math.max(2,Math.floor(r.width*S));H=Math.max(2,Math.floor(r.height*S));cv.width=W;cv.height=H;gl.viewport(0,0,W,H);if(!tx){tx=mx=W*.6;ty=my=H*.3}}
+  window.addEventListener('resize',function(){if(on)size()});
+  cv.parentNode.addEventListener('pointermove',function(e){var r=cv.getBoundingClientRect();tx=(e.clientX-r.left)*S;ty=(r.height-(e.clientY-r.top))*S});
+  function frame(now){var ox=reduce?0:Math.sin(now*.00035)*W*.08,oy=reduce?0:Math.cos(now*.00027)*H*.05;mx+=(tx+ox-mx)*.06;my+=(ty+oy-my)*.06;
+    gl.uniform2f(uR,W,H);gl.uniform1f(uT,reduce?10:(now-t0)/1000);gl.uniform2f(uM,mx,my);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);if(on&&!reduce)raf=requestAnimationFrame(frame)}
+  return{active:function(v){if(v===on)return;on=v;cancelAnimationFrame(raf);if(v){size();raf=requestAnimationFrame(frame)}}};
+})();
+
+/* ---------- per-tab init ---------- */
+var INIT={},ENTER={};
+
+/* fire stepper */
+INIT.fire=function(){
+  var steps=$$('#steps .step'),num=$('#hourNum'),arc=$('#ringArc'),when=$('#clockWhen'),where=$('#clockWhere'),figs=$$('#fireMedia .fig'),k=0,h=0,anim;
+  function tween(to){cancelAnimationFrame(anim);var from=h,t0=performance.now();(function f(t){var q=Math.min(1,(t-t0)/900);q=1-Math.pow(1-q,3);h=from+(to-from)*q;num.textContent=Math.round(h);if(q<1)anim=requestAnimationFrame(f)})(t0)}
+  function set(i){k=i;steps.forEach(function(s,j){s.classList.toggle('on',j===i);s.classList.toggle('past',j<i);$('button',s).setAttribute('aria-expanded',j===i)});
+    var s=steps[i],hr=+s.dataset.hour;tween(hr);arc.style.strokeDashoffset=276.5*(1-hr/32);when.textContent=s.dataset.when;where.innerHTML=s.dataset.where;
+    figs.forEach(function(f,j){f.classList.toggle('show',j===+s.dataset.fig)});
+    $('#stepPrev').disabled=i===0;$('#stepNext').textContent=i===steps.length-1?'See it on the map →':'Next hour →'}
+  steps.forEach(function(s,i){$('button',s).addEventListener('click',function(){set(i)})});
+  $('#stepPrev').addEventListener('click',function(){if(k>0)set(k-1)});
+  $('#stepNext').addEventListener('click',function(){if(k<steps.length-1)set(k+1);else show('map')});
+  set(0);
+};
+
+/* map */
+INIT.map=function(){
+  var C=function(r,l){return '<a class="cite" data-ref="'+r+'">'+l+'</a>'};
+  var STOPS=[
+    {x:330,y:150,h:0,t:'Olympiados Street',k:'Origin · 18 Aug, about 15:00',d:'Where the fire began, in the poor Mevlane quarter below the Upper Town ('+C('lagoudi','Lagoudi 2024')+').'},
+    {x:470,y:192,h:3,t:'Agios Dimitrios',k:'Byzantine basilica · burned',d:'The church of the city’s patron saint, now part of a UNESCO World Heritage site, was badly damaged and later restored on a large scale ('+C('unesco','UNESCO n.d.')+').'},
+    {x:330,y:420,h:7,t:'Leontos Sofou & the market',k:'Bazaars · burned overnight',d:'The second front ran down to the bazaars; by morning the commercial heart of the city was gone ('+C('papastathis','Papastathis 1978')+').'},
+    {x:510,y:280,h:10,t:'Roman Forum',k:'Top of Hébrard’s axis',d:'Hébrard planned a new civic centre at the upper end of his axis ('+C('yerolympos','Yerolympos 1996')+'). The ruins of the ancient forum seen here today were uncovered decades later.'},
+    {x:500,y:515,h:15,t:'Aristotelous Square',k:'Created after the fire',d:'No square stood here in 1917. Hébrard designed it in 1918 as a civic centre opening onto the sea, on burned ground ('+C('yerolympos','Yerolympos 1996')+').'},
+    {x:665,y:395,h:21,t:'Hagia Sophia',k:'Byzantine church · spared',d:'Also on the UNESCO list, the church survived at noon on 19 August as the flames passed around it ('+C('papastathis','Papastathis 1978')+'; '+C('unesco','UNESCO n.d.')+').'},
+    {x:820,y:490,h:30,t:'Ethnikis Amynis',k:'Eastern limit · 19 Aug, evening',d:'Formerly Hamidie Street, where the fire finally stopped ('+C('papastathis','Papastathis 1978')+').'},
+    {x:880,y:546,h:99,t:'White Tower',k:'Ottoman tower · untouched',d:'Once the south-east tower of the city’s walls, it stood just outside the burned zone and marks the fire’s eastern edge today ('+C('gac','Google Arts & Culture n.d.')+').'}
+  ];
+  var g=$('#hots'),list=$('#places'),ns='http://www.w3.org/2000/svg',active=-1;
+  STOPS.forEach(function(s,i){
+    var a=document.createElementNS(ns,'g');a.setAttribute('class','hot');a.setAttribute('tabindex','0');a.setAttribute('role','button');a.setAttribute('aria-label',s.t);
+    a.innerHTML='<circle class="halo" cx="'+s.x+'" cy="'+s.y+'" r="16" fill="none" stroke="#f0a33a" stroke-width="2"/><circle class="core" cx="'+s.x+'" cy="'+s.y+'" r="13" fill="'+(s.h>32?'#4a6d80':'#17120f')+'" stroke="#f5f0e8" stroke-width="2"/><text x="'+s.x+'" y="'+(s.y+.5)+'">'+(i+1)+'</text>';
+    a.addEventListener('click',function(){pick(i,true)});a.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(i,true)}});
+    g.appendChild(a);
+    var li=document.createElement('li');li.className='place';
+    li.innerHTML='<button aria-expanded="false"><span class="n">'+(i+1)+'</span><span><span class="t">'+s.t+'</span><span class="k">'+s.k+'</span></span></button><div class="pb"><div><p>'+s.d+'</p></div></div>';
+    $('button',li).addEventListener('click',function(){pick(i,false)});list.appendChild(li);
+  });
+  var hots=$$('.hot',g),items=$$('.place',list);
+  function pick(i,fromMap){active=(active===i&&!fromMap)?-1:i;hots.forEach(function(h,k){h.classList.toggle('on',k===active)});items.forEach(function(b,k){b.classList.toggle('on',k===active);$('button',b).setAttribute('aria-expanded',k===active)});
+    if(active>=0){if(STOPS[i].h<=32&&+range.value<STOPS[i].h)setHour(STOPS[i].h+.5,true);if(fromMap)items[i].scrollIntoView({block:'nearest',behavior:'smooth'})}}
+  var range=$('#hourRange'),front=$('#burnFront'),hourLbl=$('#mapHour'),phase=$('#mapPhase'),shown=0,target=0,raf;
+  var PH=[[0,'Sat 15:00 · the fire starts'],[3,'Sat evening · two fronts'],[9,'Sat night · firebreaks fail'],[15,'Sun morning · the wind turns'],[21,'Sun noon · Hagia Sophia spared'],[30,'Sun evening · stops at Ethnikis Amynis'],[32,'Burned out after ~32 hours']];
+  function draw(h){var q=h/32;front.setAttribute('rx',(q*1050).toFixed(1));front.setAttribute('ry',(q*560).toFixed(1));hourLbl.textContent=Math.floor(h);var p=PH[0][1];PH.forEach(function(x){if(h>=x[0])p=x[1]});phase.textContent=p;range.style.setProperty('--p',(q*100)+'%');items.forEach(function(b,i){b.classList.toggle('burned',STOPS[i].h<=h)})}
+  function loop(){shown+=(target-shown)*.12;if(Math.abs(target-shown)<.01)shown=target;draw(shown);if(shown!==target)raf=requestAnimationFrame(loop)}
+  function setHour(h,anim){target=Math.max(0,Math.min(32,h));range.value=target;cancelAnimationFrame(raf);if(anim&&!reduce)loop();else{shown=target;draw(shown)}}
+  range.addEventListener('input',function(){stop();setHour(+range.value,false)});
+  var playing=false,pt,icon=$('#playIcon');
+  function stop(){playing=false;icon.innerHTML='<path d="M7 5v14l12-7z"/>';cancelAnimationFrame(pt)}
+  function play(){if(playing){stop();return}playing=true;icon.innerHTML='<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>';var start=(+range.value>=32)?0:+range.value,t0=performance.now(),dur=(32-start)/32*9000;
+    (function f(t){if(!playing)return;var q=Math.min(1,(t-t0)/dur);setHour(start+(32-start)*q,false);if(q<1)pt=requestAnimationFrame(f);else stop()})(t0)}
+  $('#playBtn').addEventListener('click',play);
+  $$('.toggle').forEach(function(b){b.addEventListener('click',function(){var o=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',o);$$('[data-layer="'+b.dataset.toggle+'"]').forEach(function(l){l.classList.toggle('off',!o)})})});
+  draw(0);
+  if(reduce)setHour(32,false);else setTimeout(play,700);
+};
+
+/* losses: counters + chart */
+INIT.losses=function(){
+  var DATA={pallis:{rows:[['Jews',52000],['Muslims',11000],['Orthodox Christians',10000]],note:'Source: Pallis Report, in Papastathis 1978.'},umich:{rows:[['Jews',56000],['Muslims',10000],['Christians',15000]],note:'Source: University of Michigan Library n.d.'}};
+  var bars=$('#bars'),note=$('#chartNote'),seg=$('#chart .seg'),btns=$$('button',seg);
+  bars.innerHTML=[0,1,2].map(function(){return '<div class="bar-row"><span class="lab"></span><div class="track"><div class="fill"></div></div><span class="num">0</span></div>'}).join('');
+  var rows=$$('.bar-row',bars);
+  function render(key){var d=DATA[key];setTimeout(function(){d.rows.forEach(function(r,i){$('.lab',rows[i]).textContent=r[0];$('.fill',rows[i]).style.width=(r[1]/60000*100)+'%';$('.num',rows[i]).textContent=r[1].toLocaleString('en-GB')})},120);note.textContent=d.note;
+    btns.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.set===key)});segPill(seg)}
+  btns.forEach(function(b){b.addEventListener('click',function(){render(b.dataset.set)})});
+  render('pallis');
+};
+ENTER.losses=function(){
+  $$('#p-losses .cnt').forEach(function(el){var to=+el.dataset.to,t0=performance.now()+250,d=reduce?1:1500;(function f(t){var q=Math.max(0,Math.min(1,(t-t0)/d));q=1-Math.pow(1-q,4);el.textContent=Math.round(to*q).toLocaleString('en-GB');if(q<1)requestAnimationFrame(f)})(performance.now())});
+  segPill($('#chart .seg'));
+};
+function segPill(seg){var on=$$('button',seg).filter(function(b){return b.getAttribute('aria-pressed')==='true'})[0],p=$('.seg-pill',seg);if(!on||!p)return;p.style.width=on.offsetWidth+'px';p.style.transform='translateX('+on.offsetLeft+'px)'}
+
+/* rebuild: pattern compare + sub tabs */
+INIT.rebuild=function(){
+  var R=rnd(11),o='<svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice"><rect width="600" height="400" fill="#e8dcc6"/>',i;
+  for(i=0;i<230;i++){var x=R()*620-10,y=R()*350-10,w=10+R()*26,h=8+R()*20,a=(R()-.5)*50;o+='<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" transform="rotate('+a.toFixed(1)+' '+(x+w/2).toFixed(1)+' '+(y+h/2).toFixed(1)+')" fill="#b9a281" stroke="#7d6a50" stroke-width=".6"/>'}
+  o+='<g fill="none" stroke="#e8dcc6" stroke-width="4" stroke-linecap="round">';
+  for(i=0;i<10;i++){var px=R()*600,py=R()*330,d='M'+px.toFixed(0)+' '+py.toFixed(0);for(var k=0;k<5;k++){px+=(R()-.5)*160;py+=(R()-.3)*90;d+=' Q'+(px+(R()-.5)*60).toFixed(0)+' '+(py+(R()-.5)*60).toFixed(0)+' '+px.toFixed(0)+' '+py.toFixed(0)}o+='<path d="'+d+'"/>'}
+  o+='</g><g fill="#7d6a50">';for(i=0;i<5;i++)o+='<circle cx="'+(60+R()*480)+'" cy="'+(40+R()*260)+'" r="7"/>';
+  o+='</g><rect y="350" width="600" height="50" fill="#8aa0a4"/></svg>';$('#organicLayer').innerHTML=o;
+  var g='<svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice"><rect width="600" height="400" fill="#f2ead9"/><g fill="#d7c3a0" stroke="#5a4a36" stroke-width="1">';
+  for(var yy=14;yy<340;yy+=52){for(var xx=10;xx<600;xx+=64){if(xx>250&&xx<340)continue;if(yy>250&&xx>230&&xx<370)continue;g+='<rect x="'+xx+'" y="'+yy+'" width="52" height="40" rx="2"/>'}}
+  g+='</g><path d="M300 350 V10" stroke="#b33a1d" stroke-width="12"/><path d="M240 350 V285 Q300 255 360 285 V350" fill="#f2ead9" stroke="#b33a1d" stroke-width="3"/><circle cx="300" cy="40" r="22" fill="#f2ead9" stroke="#b33a1d" stroke-width="3"/><path d="M0 150 L600 90" stroke="#5a4a36" stroke-width="7" opacity=".55"/><rect y="350" width="600" height="50" fill="#8aa0a4"/></svg>';
+  $('#gridLayer').innerHTML=g;
+  var seg=$('#rbSeg');$$('button',seg).forEach(function(b){b.addEventListener('click',function(){$$('button',seg).forEach(function(x){x.setAttribute('aria-pressed',x===b)});segPill(seg);$$('#p-rebuild .pane').forEach(function(p){p.classList.toggle('show',p.dataset.pane===b.dataset.pane)})})});
+};
+ENTER.rebuild=function(){segPill($('#rbSeg'))};
+
+/* compare sliders */
+$$('.compare').forEach(function(c){var r=$('input',c);function u(){c.style.setProperty('--x',r.value+'%')}r.addEventListener('input',u);u()});
+
+/* accordion */
+$$('.acc li').forEach(function(li){var b=$('button',li);b.addEventListener('click',function(){var o=!li.classList.contains('open');li.classList.toggle('open',o);b.setAttribute('aria-expanded',o)})});
+
+/* start */
+var start=location.hash.slice(1);show(ids.indexOf(start)>=0?start:'intro',{noHash:true});
+})();
+</script>
+</body>
+</html>
